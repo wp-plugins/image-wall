@@ -3,7 +3,7 @@
 	Plugin Name: Image Wall
 	Plugin URI: http://www.themodernnomad.com/image-wall-plugin/#utm_campaign=Image_Wall&utm_source=wordpress&utm_medium=website&utm_content=plugin_link
 	Description: Browse posts/pages by their images, displayed randomly on an infinitely scrollable page. The images link back to the posts where they are attached.
-	Version: 2.0
+	Version: 2.1
 	Author: Gustav Andersson
 	Author URI: http://www.themodernnomad.com/about/#utm_campaign=Image_Wall&utm_source=wordpress&utm_medium=website&utm_content=author_link
 */
@@ -518,10 +518,12 @@ function image_wall_sc($atts) {
 			$wp_image_details = wp_get_attachment_image_src(get_the_id(), $image_size_name);
 
 			$url    = $wp_image_details[0];
-			$width  = $wp_image_details[1];
-			$height = $wp_image_details[2];
 
 			$actual_image_details = getimagesize($url);
+			
+			$width  = $actual_image_details[0];
+			$height = $actual_image_details[1];
+			
 			if($actual_image_details[0] != $image_size_details['width']) {
 				// Uh oh! We are dealing with an image size that hasn't been generated yet. To save the user from downloading potentiall huge full size images,
 				// we skip this.
