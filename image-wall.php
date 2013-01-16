@@ -3,7 +3,7 @@
 	Plugin Name: Image Wall
 	Plugin URI: http://www.themodernnomad.com/image-wall-plugin/#utm_campaign=Image_Wall&utm_source=wordpress&utm_medium=website&utm_content=plugin_link
 	Description: Browse posts/pages by their images, displayed randomly on an infinitely scrollable page. The images link back to the posts where they are attached.
-	Version: 2.1
+	Version: 2.2
 	Author: Gustav Andersson
 	Author URI: http://www.themodernnomad.com/about/#utm_campaign=Image_Wall&utm_source=wordpress&utm_medium=website&utm_content=author_link
 */
@@ -518,13 +518,29 @@ function image_wall_sc($atts) {
 			$wp_image_details = wp_get_attachment_image_src(get_the_id(), $image_size_name);
 
 			$url    = $wp_image_details[0];
+			$width  = $wp_image_details[1];
+			$height = $wp_image_details[2];
+			$image_size_generated = $wp_image_details[3]; 
 
-			$actual_image_details = getimagesize($url);
+			if(!is_numeric($width) || !is_numeric($height)) {
+				$actual_image_details = getimagesize($url);
+				if($actual_image_details){
+					$width  = $actual_image_details[0];
+					$height = $actual_image_details[1];
+				} else {
+					if($image_size_details['crop']){
+						$width  = $image_size_details['width'];
+						$height = $image_size_details['height'];
+					} else {
+						$width  = $image_size_details['width'];
+						$height = 'unknown';				
+					}
+				}		
+				$image_size_generated = $width == $image_size_details['width'];
+			}
 			
-			$width  = $actual_image_details[0];
-			$height = $actual_image_details[1];
 			
-			if($actual_image_details[0] != $image_size_details['width']) {
+			if(!$image_size_generated) {
 				// Uh oh! We are dealing with an image size that hasn't been generated yet. To save the user from downloading potentiall huge full size images,
 				// we skip this.
 				continue;
@@ -532,7 +548,7 @@ function image_wall_sc($atts) {
 
 			$max_number_of_columns = intval(( $width ) / $column_width);
 
-			if($use_column_proportion_restrictions){
+			if($use_column_proportion_restrictions && $height != 'unknown'){
 				for($i = count($column_proportion_restrictions) ; $i > 0 ; $i -- ) {
 					if( $width / $height >= $column_proportion_restrictions[$i-1] ) {
 						$number_of_columns = min($i, $max_number_of_columns);
