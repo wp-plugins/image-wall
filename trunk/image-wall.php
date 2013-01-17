@@ -3,7 +3,7 @@
 	Plugin Name: Image Wall
 	Plugin URI: http://www.themodernnomad.com/image-wall-plugin/#utm_campaign=Image_Wall&utm_source=wordpress&utm_medium=website&utm_content=plugin_link
 	Description: Browse posts/pages by their images, displayed randomly on an infinitely scrollable page. The images link back to the posts where they are attached.
-	Version: 2.2
+	Version: 2.3
 	Author: Gustav Andersson
 	Author URI: http://www.themodernnomad.com/about/#utm_campaign=Image_Wall&utm_source=wordpress&utm_medium=website&utm_content=author_link
 */
@@ -275,6 +275,17 @@ add_action('wp_enqueue_scripts', 'tmn_iw_enqueue');
 /* See http://www.themodernnomad.com/image-wall-plugin/ for example usage.*/
 add_shortcode('image_wall', 'image_wall_sc');
 function image_wall_sc($atts) {
+	global $wp_version;
+
+	if (version_compare($wp_version, '3.5') < 0) {
+		$output = "<div id='tmn-image-wall-error'><h3>
+		" . __("Uh oh! I've detected a problem setting up the Image Wall!", "image-wall") . "
+		</h3><p>
+		" . __("The Image Wall requires Wordpress version 3.5 or later. Please upgrade to the latest Wordpress version and try again.<br />Your current version is ", "image-wall") . $wp_version . "
+		</p></div>\n";
+		return $output;
+	}
+	
 	global $wp_query;	
 	
 	extract( shortcode_atts( array(	
