@@ -92,11 +92,11 @@
           transition-property: height, width;
 }
 
-.tmn-image-wall-item {
+#tmn-image-wall .tmn-image-wall-item {
 	opacity: 0;
 }
 
-.tmn-image-wall-item.masonry-brick {
+#tmn-image-wall .tmn-image-wall-item.masonry-brick {
 	opacity: 1;
   -webkit-transition-property: opacity;
      -moz-transition-property: opacity;

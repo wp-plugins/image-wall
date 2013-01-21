@@ -3,7 +3,7 @@
 	Plugin Name: Image Wall
 	Plugin URI: http://www.themodernnomad.com/image-wall-plugin/#utm_campaign=Image_Wall&utm_source=wordpress&utm_medium=website&utm_content=plugin_link
 	Description: Browse posts/pages by their images, displayed randomly on an infinitely scrollable page. The images link back to the posts where they are attached.
-	Version: 2.3
+	Version: 2.4
 	Author: Gustav Andersson
 	Author URI: http://www.themodernnomad.com/about/#utm_campaign=Image_Wall&utm_source=wordpress&utm_medium=website&utm_content=author_link
 */
@@ -623,7 +623,7 @@ function image_wall_sc($atts) {
 	for($i = 1; $i <= 10; $i++) { 	
 		$max_image_width_for_columns_spanned = $column_width * $i - $gutter_pixels;
 
-		$output .= "\n".'img.tmn-image-wall-item.tmn-image-wall-span-cols-'.$i.' { max-width: '.$max_image_width_for_columns_spanned.'px; width: '.$max_image_width_for_columns_spanned.';}';	
+		$output .= "\n".'#tmn-image-wall img.tmn-image-wall-item.tmn-image-wall-span-cols-'.$i.' { max-width: '.$max_image_width_for_columns_spanned.'px; width: '.$max_image_width_for_columns_spanned.'px;}';	
 		//$output .= "\n".'#tmn-image-wall.tmn-image-wall-cols-'.$i.' img.tmn-image-wall-item { max-width: '.$max_image_width_for_columns_spanned.'px; }';	
 	}
 	$output .= "\n".'</style>';
