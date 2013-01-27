@@ -28,6 +28,7 @@
 	border: none;
 	float: left;
 	height: auto;
+	max-height: none;
 }
 
 #tmn-image-wall-prep, #tmn-image-wall-next {
