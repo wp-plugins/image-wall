@@ -3,7 +3,7 @@
 	Plugin Name: Image Wall
 	Plugin URI: http://www.themodernnomad.com/image-wall-plugin/#utm_campaign=Image_Wall&utm_source=wordpress&utm_medium=website&utm_content=plugin_link
 	Description: Browse posts/pages by their images, displayed randomly on an infinitely scrollable page. The images link back to the posts where they are attached.
-	Version: 2.6
+	Version: 2.7
 	Author: Gustav Andersson
 	Author URI: http://www.themodernnomad.com/about/#utm_campaign=Image_Wall&utm_source=wordpress&utm_medium=website&utm_content=author_link
 */
@@ -45,10 +45,15 @@ function tmn_iw_plugin_activation()
 	wp_clear_scheduled_hook('iw_attachment_hash_regenerate');
 	wp_schedule_single_event(time(), 'iw_attachment_hash_regenerate');
 	
+	tmn_iw_set_default_variables();
+}
+
+function tmn_iw_set_default_variables()
+{	
 	// Set up our initial variables.
-	update_option( "image_wall_regen", "tmn_iw_never" );
-	update_option( "image_wall_regen_method", "hashing" );
-	update_option( "image_wall_regen_salt", rand(1, 1000) ); 
+	add_option( "image_wall_regen", "tmn_iw_never" );
+	add_option( "image_wall_regen_method", "hashing" );
+	add_option( "image_wall_regen_salt", rand(1, 1000) ); 
 } 
 
 
@@ -131,7 +136,10 @@ function tmn_iw_plugin_menu() {
 }
 function image_wall_options() {
 	if ( !current_user_can( 'manage_options' ) ) { 	wp_die( __( 'You do not have sufficient permissions to access this page.' ) );}
+	tmn_iw_set_default_variables();
 ?>
+
+
 	<div class="wrap" style="max-width: 730px;">
 		<style>
 			p.success {
@@ -541,6 +549,8 @@ function image_wall_sc($atts) {
 	$image_wall_items = array();	
 	$expect_more_posts = true;
 
+	tmn_iw_set_default_variables();
+	
 	$iw_image_wall_regen_method = get_option( "image_wall_regen_method" );
 
 	if($iw_image_wall_regen_method == "hashing") {
