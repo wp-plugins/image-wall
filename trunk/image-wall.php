@@ -3,7 +3,7 @@
 	Plugin Name: Image Wall
 	Plugin URI: http://www.themodernnomad.com/image-wall-plugin/#utm_campaign=Image_Wall&utm_source=wordpress&utm_medium=website&utm_content=plugin_link
 	Description: Browse posts/pages by their images, displayed randomly on an infinitely scrollable page. The images link back to the posts where they are attached.
-	Version: 2.4
+	Version: 2.5
 	Author: Gustav Andersson
 	Author URI: http://www.themodernnomad.com/about/#utm_campaign=Image_Wall&utm_source=wordpress&utm_medium=website&utm_content=author_link
 */
@@ -44,6 +44,11 @@ function tmn_iw_plugin_activation()
 	wp_clear_scheduled_hook('tmn_tmp_iw_regenerate_action');
 	wp_clear_scheduled_hook('iw_attachment_hash_regenerate');
 	wp_schedule_single_event(time(), 'iw_attachment_hash_regenerate');
+	
+	// Set up our initial variables.
+	update_option( "image_wall_regen", "tmn_iw_never" );
+	update_option( "image_wall_regen_method", "hashing" );
+	update_option( "image_wall_regen_salt", rand(1, 1000) ); 
 } 
 
 
@@ -55,7 +60,11 @@ register_deactivation_hook(__FILE__,'tmn_iw_plugin_deactivation');
 function tmn_iw_plugin_deactivation()
 {
 	wp_clear_scheduled_hook('iw_attachment_hash_regenerate');
-	do_action( 'iw_attachment_hash_clear' );
+	delete_option( "image_wall_regen" );
+	delete_option( "image_wall_regen_method" );
+	delete_option( "image_wall_regen_salt" );	
+	global $wpdb;
+	$wpdb->query( "DELETE FROM $wpdb->postmeta WHERE meta_key = 'tmn-iw-hash'");
 }
 
 
@@ -64,18 +73,7 @@ function tmn_iw_plugin_deactivation()
 /************************************************************************/
 
 add_action('iw_attachment_hash_regenerate','tmn_iw_attachment_hash_regenerate');
-add_action('iw_attachment_hash_clear','tmn_iw_attachment_hash_clear');
 add_action('add_attachment','tmn_iw_attachment_hash_regenerate');
-
-
-/**
- * load plugin text domain:
- */
-function tmn_iw_init() {
- $plugin_dir = basename(dirname(__FILE__)).'/languages' ;
- load_plugin_textdomain( 'image-wall', false, $plugin_dir );
-}
-add_action('plugins_loaded', 'tmn_iw_init');
 
 
 /* Regenerates the Image Wall hash, salted by the time of the request to simulate randomness. 
@@ -103,20 +101,20 @@ function tmn_iw_attachment_hash_regenerate($attachment_id) {
 	}
 }
 
-/* Clears all the Image Wall time hashes from all attachments. */
-function tmn_iw_attachment_hash_clear() {
-	$myposts = get_posts( array(
-		'post_type' 	=> 'attachment',
-		'nopaging' 	=> true,
-		'post_status' 	=> 'all',
-		'post_parent' 	=> null
-	) );
-	foreach( $myposts as $mypost ) {
-		delete_post_meta($mypost->ID, 'tmn-iw-hash' );
+/************************************************************************/
+/*		REPEATABLE RANDOM ORDER FILTER 				*/
+/************************************************************************/
+
+// Retrieve consistent random set of posts with pagination
+function tmn_iw_posts_query_override($query) {
+	global $tmn_iw_posts_query;
+
+	if ($tmn_iw_posts_query && strpos($query, 'ORDER BY RAND()') !== false) {
+		$query = str_replace('ORDER BY RAND()',$tmn_iw_posts_query,$query);
 	}
+	return $query;
 }
-
-
+add_filter('query','tmn_iw_posts_query_override');
 
 
 /************************************************************************/
@@ -135,6 +133,22 @@ function image_wall_options() {
 	if ( !current_user_can( 'manage_options' ) ) { 	wp_die( __( 'You do not have sufficient permissions to access this page.' ) );}
 ?>
 	<div class="wrap" style="max-width: 730px;">
+		<style>
+			p.success {
+				border: 1px solid green;
+				background: palegreen;
+				padding: 3px;
+				font-weight: bold;
+			}
+			
+			p.error {
+				border: 1px solid red;
+				background: lightsalmon;
+				padding: 3px;
+				font-weight: bold;
+			}
+				
+		</style>
 		<div id="icon-options-general" class="icon32"></div>
 		
 		<h2>The Image Wall</h2> 
@@ -156,11 +170,13 @@ function image_wall_options() {
 
 		<p><code>[image_wall image_sizes='thumbnail, medium' column_width='' batch_size='50' buffer_pixels='2000' support_author='false' move_to_end='false' column_proportion_restrictions='2.0' open_links_in_new_window='true' include_categories='' exclude_categories='' include_tags='' exclude_tags='' include_pages='true' background_color='black' gutter_pixels='8' corner_radius='8']</code></p>
 		
-		<h3>Image Order</h3>
+		<h3>Image Order Regeneration Schedule</h3>
 		
-		<p>The ordering of the images is randomized when you activate the plugin. New images are slotted into the order at random.</p>
+		<p>The ordering of the images is randomized when you activate the plugin. New images are slotted into the order at random as you add them to your media library.</p>
 		
-		<p>The image order generation process can be resource heavy, so by default it is only done once at plugin activation. However, if you wish to schedule a new order to be generated at a given interval, you can choose to do so below.</p>
+		<p>By default, this is done once at plugin activation and the same order is then maintained. If you wish to schedule a new order to be generated at a given interval, you can choose to do so below.</p>
+	
+		<p>If you have a caching plugin, some images may never appear and some may be duplicated if your caching plugin caches and maintains old batches of images. Either accept this, disable caching for the Image Wall page or clear out your cache after generating a new order.</p>
 		
 		<p>When you click the button, a new order will be generated immediately and the schedule updated. If you want to do a once-off order generation without setting a schedule, set or leave the radio button at 'Never' and click the button.</p>
 
@@ -172,31 +188,77 @@ function image_wall_options() {
 				$_POST[ "image_wall_regen" ] == "tmn_iw_weekly"  ||
 				$_POST[ "image_wall_regen" ] == "tmn_iw_monthly" )
 			{
+				update_option( "image_wall_regen", $_POST[ "image_wall_regen" ] );
 				
-				wp_clear_scheduled_hook('iw_attachment_hash_regenerate');
-				
-				if($_POST[ "image_wall_regen" ] == "tmn_iw_never") {
-					wp_schedule_single_event(time(), 'iw_attachment_hash_regenerate');
-					echo '<p class="success">A one-off image order generation has begun.>';
-				} else {
-					wp_schedule_event( time(), $_POST[ "image_wall_regen" ], 'iw_attachment_hash_regenerate');
-					echo '<p class="success">An image order generation has begun and the schedule has been updated.</p>';
-				}
+				if(get_option( "image_wall_regen_method" ) == "hashing"){
+					wp_clear_scheduled_hook('iw_attachment_hash_regenerate');
+
+					if($_POST[ "image_wall_regen" ] == "tmn_iw_never") {
+						wp_schedule_single_event(time(), 'iw_attachment_hash_regenerate');
+						echo '<p class="success">A one-off image order hash generation has begun.</p>';
+					} else {
+						wp_schedule_event( time(), $_POST[ "image_wall_regen" ], 'iw_attachment_hash_regenerate');
+						echo '<p class="success">An image order hash generation has begun and the schedule has been updated.</p>';
+					}
+				} elseif(get_option( "image_wall_regen_method" ) == "calculation"){ 
+					update_option( "image_wall_regen_salt", rand(1, 1000) ); 
+					echo '<p class="success">The image re-generation schedule (using the calculation method) has been updated.</p>';
+				}								
 			} else {
 				echo '<p class="error">The given schedule of [' . $_POST[ "image_wall_regen" ] . '] is not a valid schedule!</p>';
 			}
 		}
 		
-		$tmn_iw_schedule = wp_get_schedule( 'iw_attachment_hash_regenerate' );
+		$tmn_iw_schedule = get_option("image_wall_regen" );
 		?>
 		
 		
 		<form method="post">
-			<input type="radio" name="image_wall_regen" value="tmn_iw_never"   <?php checked( $tmn_iw_schedule, false, true ); ?>> Never
+			<input type="radio" name="image_wall_regen" value="tmn_iw_never"   <?php checked( $tmn_iw_schedule, 'tmn_iw_never', true ); ?>> Never
 			<input type="radio" name="image_wall_regen" value="tmn_iw_daily"   <?php checked( $tmn_iw_schedule, 'tmn_iw_daily',   true ); ?> style="margin-left: 5px"> Daily
 			<input type="radio" name="image_wall_regen" value="tmn_iw_weekly"  <?php checked( $tmn_iw_schedule, 'tmn_iw_weekly',  true ); ?> style="margin-left: 5px"> Weekly
 			<input type="radio" name="image_wall_regen" value="tmn_iw_monthly" <?php checked( $tmn_iw_schedule, 'tmn_iw_monthly', true ); ?> style="margin-left: 5px"> Monthly <br/>
 			<input type='submit' value='Generate New Order And Update Schedule' class='button-primary'  style="margin-top: 5px"/>
+		</form>
+		
+		<h3>Image Order Generator Method</h3>
+		
+		<p>By default, the Image Wall uses a Hashing method to create and save the randomized image ordering. This is resource heavy at the time of hashing, but then it is fast. This is the preferred method, but sometimes this hashing method stalls. If the Image Wall shows an error telling you that it can find no images to show, and waiting a few hours doesn't help, then try the Calculation method.</p>
+		
+		<p>The Calculation method doesn't do any up-front order hashing but calculates a random order when the Image Wall is accesses. Slightly slower than the Hashing method, but it bypasses the Hashing which can, on some WordPress installation, stall and break. Use this method if the "Can't find any images" error message doesn't go away a few hours after plugin activation.</p>
+
+		<?php 
+				
+		if( isset($_POST[ "image_wall_regen_method" ]) ) {
+			$tmn_iw_old_method = get_option("image_wall_regen_method" );
+			if( $_POST[ "image_wall_regen_method" ] == "hashing" && $tmn_iw_old_method != $_POST[ "image_wall_regen_method" ]) {
+				update_option( "image_wall_regen_method", "hashing" );
+				
+				wp_clear_scheduled_hook('iw_attachment_hash_regenerate');
+				$tmn_iw_schedule = get_option("image_wall_regen" );
+
+				if($tmn_iw_schedule == "tmn_iw_never") {
+					wp_schedule_single_event(time(), 'iw_attachment_hash_regenerate');
+					echo '<p class="success">Hashing method activated and a one-off image order hash generation has begun.</p>';
+				} else {
+					wp_schedule_event( time(), $tmn_iw_schedule, 'iw_attachment_hash_regenerate');
+					echo '<p class="success">Hashing method activated and an image order hash generation has begun.</p>';
+				}
+			} elseif( $_POST[ "image_wall_regen_method" ] == "calculation"  && $tmn_iw_old_method != $_POST[ "image_wall_regen_method" ]) {
+				update_option( "image_wall_regen_method", "calculation" );
+				echo '<p class="success">Calculation method activated.</p>';
+			} else {
+				echo '<p class="error">The existing image randomization method has been kept active.</p>';
+			}
+		}
+		
+		$tmn_iw_method = get_option( "image_wall_regen_method" );
+		?>
+		
+		<form method="post">
+			<input type="radio" name="image_wall_regen_method" value="hashing"   	<?php checked( $tmn_iw_method, 'hashing',     true ); ?>> Hashing
+			<input type="radio" name="image_wall_regen_method" value="calculation"	<?php checked( $tmn_iw_method, 'calculation', true ); ?> style="margin-left: 5px"> Calculation<br />
+			<input type='submit' value='Update the Image Randomization Method' class='button-primary'  style="margin-top: 5px"/>
 		</form>
 		
 		<h3>What to do if the image wall doesn't function</h3>
@@ -218,7 +280,7 @@ function image_wall_options() {
  // ------------------------------------------------------------------
 function my_add_intervals($schedules) {
 	$schedules['tmn_iw_daily'] = array(
-		'interval' => 604800,
+		'interval' => 86400,
 		'display' => __('Once Daily')
 	);
 	$schedules['tmn_iw_weekly'] = array(
@@ -478,25 +540,63 @@ function image_wall_sc($atts) {
 	$tmn_page = isset($_GET["tmn_iw_page"]) ? $_GET["tmn_iw_page"] : '1' ;
 	$image_wall_items = array();	
 	$expect_more_posts = true;
-	
-	// Done unpacking and verifying the arguments. Let's get some real coding done!
-	// Create our new image query and run the loop
-	$iw_query = new WP_Query( array(
-		'post_type' 	 => 'attachment',
-		'post_mime_type' =>'image',
-		'posts_per_page' => $batch_size,
-		'nopaging' 	 => false,
-		'post_status' 	 => 'all',
-		'meta_key' 	 => 'tmn-iw-hash',
-		'orderby' 	 => 'meta_value',
-		'paged' 	 => $tmn_page
-	) );	
 
+	$iw_image_wall_regen_method = get_option( "image_wall_regen_method" );
+
+	if($iw_image_wall_regen_method == "hashing") {
+		// Done unpacking and verifying the arguments. Let's get some real coding done!
+		// Create our new image query and run the loop
+		$iw_query = new WP_Query( array(
+			'post_type' 	 => 'attachment',
+			'post_mime_type' =>'image',
+			'posts_per_page' => $batch_size,
+			'nopaging' 	 => false,
+			'post_status' 	 => 'all',
+			'meta_key' 	 => 'tmn-iw-hash',
+			'orderby' 	 => 'meta_value',
+			'paged' 	 => $tmn_page
+		) );	
+	} elseif ($iw_image_wall_regen_method == "calculation") {
+			$iw_image_wall_regen_salt   = get_option( "image_wall_regen_salt" );	 
+			$iw_image_wall_regen        = get_option( "image_wall_regen" );
+			
+			if($iw_image_wall_regen == "tmn_iw_never"){
+				$seed = $iw_image_wall_regen_salt;
+			} elseif ($iw_image_wall_regen == "tmn_iw_daily"){
+				$seed = $iw_image_wall_regen_salt . date('Ymd');
+			} elseif ($iw_image_wall_regen == "tmn_iw_weekly"){
+				$seed = $iw_image_wall_regen_salt . date('YmW');
+			} elseif ($iw_image_wall_regen == "tmn_iw_monthly"){
+				$seed = $iw_image_wall_regen_salt . date('Ym');
+			} else {
+				return "<div id='tmn-image-wall-error'><h3>Uh oh! I've detected a problem setting up the Image Wall!</h3><p>This is serious. I've been told to generate the image wall using a order regeneration of '".print_r($iw_image_wall_regen)."', but I don't know what that is.  Please <a href='http://www.themodernnomad.com/contact/'>contact me</a> and let me know that you have a problem, and I will take a look at it!</p></div>";
+			}			
+			global $tmn_iw_posts_query;
+			$tmn_iw_posts_query = " ORDER BY RAND($seed) "; // Turn on filter
+			
+			// Done unpacking and verifying the arguments. Let's get some real coding done!
+			// Create our new image query and run the loop
+			$iw_query = new WP_Query( array(
+				'post_type' 	 => 'attachment',
+				'post_mime_type' =>'image',
+				'posts_per_page' => $batch_size,
+				'nopaging' 	 => false,
+				'post_status' 	 => 'all',
+				'orderby' 	 => 'rand',
+				'paged' 	 => $tmn_page
+			) );	
+		
+			$tmn_iw_posts_query = ''; // Turn off filter
+
+	} else {
+			return "<div id='tmn-image-wall-error'><h3>Uh oh! I've detected a problem setting up the Image Wall!</h3><p>This is serious. I've been told to generate the image wall using a order method that I don't recognize. What is '".print_r($iw_image_wall_regen_method)."' anyway? Please <a href='http://www.themodernnomad.com/contact/'>contact me</a> and let me know that you have a problem, and I will take a look at it!</p></div>";		
+	}
+	
 
 	// Loop over each of our fetched attachments.
 	if( ! $iw_query->have_posts()) {
 		if( $tmn_page == 1 ) {
-			return "<div id='tmn-image-wall-error'><h3>" . __("Uh oh! I have no photos to display!", "image-wall") . "</h3><p>" . __("If you just activated the Image Wall plugin, then I am most likely still working on processing your images and generating a random order. Get a cup of tea and check back in an hour. If this error is still here, then <a href='http://www.themodernnomad.com/contact/'>contact me</a> and let me know that you have a problem, and I will take a look at it!", "image-wall") . "</p></div>";
+			return "<div id='tmn-image-wall-error'><h3>" . __("Uh oh! I have no photos to display!", "image-wall") . "</h3><p>" . __("If you just activated the Image Wall plugin, then I am most likely still working on processing your images and generating a random order. Get a cup of tea and check back in an hour. If this error is still here, then go to the 'Settings -> Image Wall' admin screen and switch to the 'Calculation' image order method. If you've done so and still see this message? Then please <a href='http://www.themodernnomad.com/contact/'>contact me</a> and let me know that you have a problem, and I will take a look at it!", "image-wall") . "</p></div>";
 		} else {
 			exit(404); // This tells infinite scroll to stop looking for more images.
 		}
