@@ -18,6 +18,13 @@
 	margin-top: 10px;
 }
 
+#tmn-image-wall, #tmn-image-wall * {
+	-webkit-box-sizing: content-box;
+	-moz-box-sizing: content-box;
+	-o-box-sizing: content-box;
+	box-sizing: content-box;
+}
+
 #tmn-image-wall img.tmn-image-wall-item, #tmn-image-wall a:hover img.tmn-image-wall-item {
 	background: black;
 	padding: 0px;
