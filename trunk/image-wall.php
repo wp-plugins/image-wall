@@ -3,7 +3,7 @@
 	Plugin Name: Image Wall
 	Plugin URI: http://www.themodernnomad.com/image-wall-plugin/#utm_campaign=Image_Wall&utm_source=wordpress&utm_medium=website&utm_content=plugin_link
 	Description: Browse posts/pages by their images, displayed randomly on an infinitely scrollable page. The images link back to the posts where they are attached.
-	Version: 2.8
+	Version: 2.9
 	Author: Gustav Andersson
 	Author URI: http://www.themodernnomad.com/about/#utm_campaign=Image_Wall&utm_source=wordpress&utm_medium=website&utm_content=author_link
 */
@@ -619,11 +619,13 @@ function image_wall_sc($atts) {
 		// Don't show orphaned or un-published images.
 		if ( !$parent_ID || get_post_field('post_status', $parent_ID ) != 'publish' ) continue; 
 		if ( ! $include_pages && get_post_type( $parent_ID ) == 'page' ) continue;
-		if ( !empty($include_categories) && ! in_category( $include_categories, $parent_ID ) ) continue;
-		if ( !empty($exclude_categories ) &&   in_category( $exclude_categories , $parent_ID ) ) continue;
-		if ( !empty($include_tags) && ! has_tag( $include_tags, $parent_ID ) ) continue;
-		if ( !empty($exclude_tags) &&   has_tag( $exclude_tags, $parent_ID ) ) continue;
-
+		if ( get_post_type( $parent_ID ) != 'page' ) {
+			if ( !empty($include_categories) && ! in_category( $include_categories, $parent_ID ) ) continue;
+			if ( !empty($exclude_categories) &&   in_category( $exclude_categories, $parent_ID ) ) continue;
+			if ( !empty($include_tags) && ! has_tag( $include_tags, $parent_ID ) ) continue;
+			if ( !empty($exclude_tags) &&   has_tag( $exclude_tags, $parent_ID ) ) continue;
+		}
+		
 		// We need to find the best available image size to use. 
 		// That is the image size that will span the most columns (legally) while using the fewest pixels.
 		// There must also be a pre-generated version of the image size so we don't use the full image and 
