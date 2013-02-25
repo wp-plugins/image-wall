@@ -3,7 +3,7 @@ Contributors: parakoos
 Tags: gallery, galleries, images, ajax, image, media, photo, photos, shortcode, 
 Requires at least: 3.5
 Tested up to: 3.5.1
-Stable tag: 2.8
+Stable tag: 2.9
 Donate link: http://www.themodernnomad.com/#utm_campaign=Image_Wall&utm_source=wordpress&utm_medium=website&utm_content=donation
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -84,3 +84,6 @@ You can customize much of the functionality of the Image Wall through shortcode 
 
 = 2.8 =
 * Setting back the box-sizing CSS setting of the container to content-box (in case a theme has set this to border-box)
+
+= 2.9 =
+* Fixed a bug where using both include_category/tag and include_pages didn't work.
