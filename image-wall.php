@@ -3,7 +3,7 @@
 	Plugin Name: Image Wall
 	Plugin URI: http://www.themodernnomad.com/image-wall-plugin/#utm_campaign=Image_Wall&utm_source=wordpress&utm_medium=website&utm_content=plugin_link
 	Description: Browse posts/pages by their images, displayed randomly on an infinitely scrollable page. The images link back to the posts where they are attached.
-	Version: 2.9
+	Version: 2.10
 	Author: Gustav Andersson
 	Author URI: http://www.themodernnomad.com/about/#utm_campaign=Image_Wall&utm_source=wordpress&utm_medium=website&utm_content=author_link
 */
@@ -359,7 +359,7 @@ function image_wall_sc($atts) {
 	global $wp_query;	
 	
 	extract( shortcode_atts( array(	
-		'image_sizes' 			=> 'thumbnail, medium' , 
+		'image_sizes' 			=> 'medium' , 
 		'column_width' 			=> '', 
 		'batch_size' 			=> '50',
 		'buffer_pixels' 		=> '2000',

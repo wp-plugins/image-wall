@@ -3,7 +3,7 @@ Contributors: parakoos
 Tags: gallery, galleries, images, ajax, image, media, photo, photos, shortcode, 
 Requires at least: 3.5
 Tested up to: 3.5.1
-Stable tag: 2.9
+Stable tag: 2.10
 Donate link: http://www.themodernnomad.com/#utm_campaign=Image_Wall&utm_source=wordpress&utm_medium=website&utm_content=donation
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -87,3 +87,6 @@ You can customize much of the functionality of the Image Wall through shortcode 
 
 = 2.9 =
 * Fixed a bug where using both include_category/tag and include_pages didn't work.
+
+= 2.10 =
+* Changes the default value of the 'image_sizes' attribute to 'medium' from the previous 'thumbnail, medium'. If you used to rely on the default value, and want to keep both thumbnails and medium sizes, you must now specify it explicitly! (The reason for this change is that most users ran into issues with the thumbnails usually being cropped, and I've had to take a lot of support calls where the solution is to set the image_sizes to just medium.
