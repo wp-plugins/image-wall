@@ -3,7 +3,7 @@
 	Plugin Name: Image Wall
 	Plugin URI: http://www.themodernnomad.com/image-wall-plugin/#utm_campaign=Image_Wall&utm_source=wordpress&utm_medium=website&utm_content=plugin_link
 	Description: Browse posts/pages by their images, displayed randomly on an infinitely scrollable page. The images link back to the posts where they are attached.
-	Version: 2.10
+	Version: 2.11
 	Author: Gustav Andersson
 	Author URI: http://www.themodernnomad.com/about/#utm_campaign=Image_Wall&utm_source=wordpress&utm_medium=website&utm_content=author_link
 */
@@ -160,6 +160,23 @@ function image_wall_options() {
 		<div id="icon-options-general" class="icon32"></div>
 		
 		<h2>The Image Wall</h2> 
+
+		<div id="donate" style="float: right;border: 1px solid black;width: 206px;margin: -6px 0 10px 20px;background: lightcyan;padding: 5px;text-align: justify;">
+			<h3>Support This Plugin</h3>
+			<p>Have you found this plugin useful? Please help support it's continued development with a donation.</p>
+			<form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_blank" style="text-align: center;">
+				<input type="hidden" name="cmd" value="_s-xclick">
+				<input type="hidden" name="hosted_button_id" value="NU9BQUY8MTEAQ">
+				<input type="image" src="https://www.paypalobjects.com/en_US/GB/i/btn/btn_donateCC_LG.gif" border="0" name="submit" alt="PayPal – The safer, easier way to pay online.">
+				<img alt="" border="0" src="https://www.paypalobjects.com/en_GB/i/scr/pixel.gif" width="1" height="1">
+			</form>
+			<h3>Short on funds?</h3>
+			<ul style="list-style: initial; padding-left: 18px;">
+				<li><a href="http://wordpress.org/support/view/plugin-reviews/image-wall" target="_blank">Give the Image Wall a 5★ rating</a>.</li>
+				<li>Link back to the <a href="http://www.themodernnomad.com/image-wall-plugin/" target="_blank">plugin page</a>.</li>
+				<li>Give my blog, <a href="http://www.themodernnomad.com#utm_campaign=Image_Wall&utm_source=wordpress&utm_medium=website&utm_content=donate" target="_blank">The Modern Nomad</a>, a read. You might like it!</li>
+			</ul>
+		</div>
 		
 		<h3>What is the Image Wall for?</h3>
 		
@@ -378,6 +395,8 @@ function image_wall_sc($atts) {
 
 	), $atts ) );
 
+	echo("<!-- Image Wall Arguments: image_sizes=$image_sizes ; column_width=$column_width ; batch_size=$batch_size ; buffer_pixels=$buffer_pixels ; support_author=$support_author ; move_to_end=$move_to_end ; column_proportion_restrictions=$column_proportion_restrictions ; open_links_in_new_window=$open_links_in_new_window ; include_categories=$include_categories ; exclude_categories=$exclude_categories ; include_tags=$include_tags ; exclude_tags=$exclude_tags ; include_pages=$include_pages ; background_color=$background_color ; gutter_pixels=$gutter_pixels ; corner_radius=$corner_radius -->");
+	
 	// Find, process and verify the image sizes //	
 	$image_sizes = preg_split("/[\s,]+/",$image_sizes, NULL, PREG_SPLIT_NO_EMPTY);
 	$erroneous_image_sizes = array_diff($image_sizes, get_intermediate_image_sizes());
