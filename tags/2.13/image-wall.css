@@ -1,0 +1,126 @@
+#tmn-image-wall-support {
+	font-size: 13px;
+}
+
+#tmn-image-wall-error {
+	background: #F6F6F6;
+	border: 3px solid red;
+	padding: 5px;
+}
+
+#tmn-image-wall  {
+	background: #F6F6F6	;
+	padding: 0;
+	margin: 0;
+	margin-left: auto;
+	margin-right: auto;
+	margin-bottom: 10px;
+	margin-top: 10px;
+}
+
+#tmn-image-wall, #tmn-image-wall * {
+	-webkit-box-sizing: content-box;
+	-moz-box-sizing: content-box;
+	-o-box-sizing: content-box;
+	box-sizing: content-box;
+}
+
+#tmn-image-wall img.tmn-image-wall-item, #tmn-image-wall a:hover img.tmn-image-wall-item {
+	background: black;
+	padding: 0px;
+	border-bottom: 0px;
+	-moz-box-shadow: none;
+	-webkit-box-shadow: none;
+	box-shadow: none;
+	border: none;
+	float: left;
+	height: auto;
+	max-height: none;
+}
+
+#tmn-image-wall-prep, #tmn-image-wall-next {
+	display: none;
+}
+
+
+#tmn-image-wall-scroll-messages {
+	position: absolute;
+	bottom: 50px;
+	z-index: 50;
+	width: 100%
+}
+
+#tmn-image-wall-scroll-messages #infscr-loading {
+	background: white;
+	border: 6px solid black;
+	-moz-border-radius: 18px;
+	-webkit-border-radius: 18px;
+	border-radius: 18px;
+	-moz-box-shadow: 0px 0px 8px #888;	
+	-webkit-box-shadow: 0px 0px 8px #888;
+	box-shadow: 0px 0px 8px #888;
+	padding: 10px;
+	margin-left: auto;
+	margin-right: auto;
+	width: 222px;
+}
+
+#tmn-image-wall-scroll-messages #infscr-loading img {
+	background: none;
+	border: none;
+	margin: 0px auto;
+	display: block;
+	padding: 0px;
+	-moz-box-shadow: none;
+	-webkit-box-shadow: none;
+	box-shadow: none;
+	-moz-border-radius: 0px;
+	-webkit-border-radius: 0px;
+	border-radius: 0px;
+}
+
+#tmn-image-wall-scroll-messages #infscr-loading div {
+	text-align: center;
+}
+
+#tmn-image-wall, .tmn-image-wall-item {
+  /* change duration value to whatever you like */
+  -webkit-transition-duration: 1.2s;
+     -moz-transition-duration: 1.2s;
+      -ms-transition-duration: 1.2s;
+       -o-transition-duration: 1.2s;
+          transition-duration: 1.2s;
+}
+
+#tmn-image-wall {
+  -webkit-transition-property: height, width;
+     -moz-transition-property: height, width;
+      -ms-transition-property: height, width;
+       -o-transition-property: height, width;
+          transition-property: height, width;
+}
+
+#tmn-image-wall .tmn-image-wall-item {
+	opacity: 0;
+}
+
+#tmn-image-wall .tmn-image-wall-item.masonry-brick {
+	opacity: 1;
+  -webkit-transition-property: opacity;
+     -moz-transition-property: opacity;
+      -ms-transition-property: opacity;
+       -o-transition-property: opacity;
+          transition-property: opacity;
+}
+
+/**** disabling MASONRY CSS3 transitions ****/
+
+#tmn-image-wall.no-transition,
+#tmn-image-wall.no-transition .tmn-image-wall-item,
+#tmn-image-wall .tmn-image-wall-item.no-transition {
+  -webkit-transition-duration: 0s;
+     -moz-transition-duration: 0s;
+      -ms-transition-duration: 0s;
+       -o-transition-duration: 0s;
+          transition-duration: 0s;
+}
