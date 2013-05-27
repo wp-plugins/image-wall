@@ -68,9 +68,9 @@ function isotopeParseLoadMoreImagesPath(path, page){
 			itemSelector : '#tmn-image-wall-prep',
 			pathParse    : isotopeParseLoadMoreImagesPath,
 			loading: {
-				msgTextloading		 : tmniwjsi18n.msgTextloading ,
-				msgText			 : tmniwjsi18n.msgText ,
-				finishedMsg		 : tmniwjsi18n.finishedMsg ,
+				msgTextloading		 : "Congratulations, you've reached the end of the internet.", // tmniwjsi18n.msgTextloading ,
+				msgText			 : "Loading more images...", //tmniwjsi18n.msgText ,
+				finishedMsg		 : "You have reached the end of the internet!", //tmniwjsi18n.finishedMsg ,
 				selector		 : '#tmn-image-wall-scroll-messages',
 				img			 : tmn_iw_get_scroll_img_url()
 			},
