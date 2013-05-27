@@ -3,7 +3,7 @@
 	Plugin Name: Image Wall
 	Plugin URI: http://www.themodernnomad.com/image-wall-plugin/#utm_campaign=Image_Wall&utm_source=wordpress&utm_medium=website&utm_content=plugin_link
 	Description: Browse posts/pages by their images, displayed randomly on an infinitely scrollable page. The images link back to the posts where they are attached.
-	Version: 2.12
+	Version: 2.13
 	Author: Gustav Andersson
 	Author URI: http://www.themodernnomad.com/about/#utm_campaign=Image_Wall&utm_source=wordpress&utm_medium=website&utm_content=author_link
 */
@@ -329,7 +329,7 @@ function tmn_iw_enqueue() {
 	global $post;
 	if (   preg_match('/(?<!\[)\[image_wall.*?\]/', $post->post_content) ) {
 		wp_register_script ( 'infinitescroll', plugins_url( 'jquery.infinitescroll.js'  , __FILE__ ), array(), '2.0b2.120519', true );
-		wp_enqueue_script  ('tmniwjs', plugins_url( 'image-wall.js'  , __FILE__ ), array('jquery', 'jquery-masonry', 'infinitescroll'), '1', true);
+		wp_enqueue_script  ('tmniwjs', plugins_url( 'image-wall.js'  , __FILE__ ), array('jquery', 'jquery-masonry', 'infinitescroll'), '2', true);
 /*
 		$translation_array = array( 
 			'msgTextLoading' => __( "Congratulations, you've reached the end of the internet.", 'image-wall' ) ,

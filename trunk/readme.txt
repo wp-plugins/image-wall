@@ -3,7 +3,7 @@ Contributors: parakoos
 Tags: gallery, galleries, images, ajax, image, media, photo, photos, shortcode, 
 Requires at least: 3.5
 Tested up to: 3.5.1
-Stable tag: 2.12
+Stable tag: 2.13
 Donate link: http://www.themodernnomad.com/#utm_campaign=Image_Wall&utm_source=wordpress&utm_medium=website&utm_content=donation
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -97,3 +97,6 @@ You can customize much of the functionality of the Image Wall through shortcode 
 
 = 2.12 =
 * Fixed an issue where certain PHP versions would print out a silly mistake a made which forced PHP to (rightly) assume that a variable was actually a string.
+
+= 2.13 =
+Fixed a bug introduced in 2.12. Don't use 2.12. It won't load more than the first batch of photos. Apologies.
