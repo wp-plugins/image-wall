@@ -2,8 +2,8 @@
 Contributors: parakoos
 Tags: gallery, galleries, images, ajax, image, media, photo, photos, shortcode, 
 Requires at least: 3.5
-Tested up to: 3.5.1
-Stable tag: 2.13
+Tested up to: 3.9
+Stable tag: 2.14
 Donate link: http://www.themodernnomad.com/#utm_campaign=Image_Wall&utm_source=wordpress&utm_medium=website&utm_content=donation
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -100,3 +100,6 @@ You can customize much of the functionality of the Image Wall through shortcode 
 
 = 2.13 =
 Fixed a bug introduced in 2.12. Don't use 2.12. It won't load more than the first batch of photos. Apologies.
+
+= 2.14 =
+Fixed some compatibility issues with WordPress v3.9.

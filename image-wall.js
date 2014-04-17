@@ -54,7 +54,7 @@ function isotopeParseLoadMoreImagesPath(path, page){
 		$container.masonry({
 			itemSelector 	: '.tmn-image-wall-item',
 			columnWidth	: tmn_iw_get_column_width,
-			gutterWidth	: 0,
+			gutter		: 0,
 			isFitWidth	: true,
 			isAnimated	: false
 		});
@@ -81,20 +81,20 @@ function isotopeParseLoadMoreImagesPath(path, page){
 			if(iw_debug) console.log('Image Wall: New images found through Infinite Scroll.');
 			var tempHolder = $( newElements );
 			var theimages = tempHolder.find('img')
+			var theitems = tempHolder.find('.tmn-image-wall-item-link')
+			
 			if(theimages.length == 0) {
 				if(iw_debug) console.log('Image Wall: No new images found. Asking for another batch.');
 				$container.infinitescroll('scroll');	
 				tempHolder.remove();
 			} else {
-				theimages.imagesLoaded(function (e) {
-					if(iw_debug) console.log('Image Wall: Image (single?) loaded from temporary holder. Adding them to the Image Wall.');
-					var newItem = $(this).parent();
-
-					$container.append( newItem ).masonry( 'appended', newItem, true );
-					if(tempHolder.children().length == 0) {
-						if(iw_debug) console.log('Image Wall: No more images in the temporary holder. Removing it.');
-						tempHolder.remove();
-					}
+				theimages.imagesLoaded(function (imgLoad) {
+  					if(iw_debug) console.log('Image Wall: ' + imgLoad.images.length +' images loaded from temporary holder. Adding them to the Image Wall.');
+  					theimages.css( 'opacity', 0);
+					$container.append( theitems ).masonry( 'appended', theitems, true );
+					
+					if(iw_debug) console.log('Image Wall: No more images in the temporary holder. Removing it.');
+					tempHolder.remove();
 				});
 				if(iw_debug) console.log('Image Wall: New image added to the Image Wall. Appending it to the body while we wait for images to load.');
 				tempHolder.appendTo($('body'));			
