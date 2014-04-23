@@ -3,7 +3,7 @@ Contributors: parakoos
 Tags: gallery, galleries, images, ajax, image, media, photo, photos, shortcode, 
 Requires at least: 3.5
 Tested up to: 3.9
-Stable tag: 2.14
+Stable tag: 2.15
 Donate link: http://www.themodernnomad.com/#utm_campaign=Image_Wall&utm_source=wordpress&utm_medium=website&utm_content=donation
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -103,3 +103,6 @@ Fixed a bug introduced in 2.12. Don't use 2.12. It won't load more than the firs
 
 = 2.14 =
 Fixed some compatibility issues with WordPress v3.9.
+
+= 2.15 =
+Fixed a backward compatibility issue with pre-3.9 WP versions introduced in 2.14.

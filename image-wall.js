@@ -92,6 +92,7 @@ function isotopeParseLoadMoreImagesPath(path, page){
   					if(iw_debug) console.log('Image Wall: ' + imgLoad.images.length +' images loaded from temporary holder. Adding them to the Image Wall.');
   					theimages.css( 'opacity', 0);
 					$container.append( theitems ).masonry( 'appended', theitems, true );
+					theimages.css( 'opacity', 1);
 					
 					if(iw_debug) console.log('Image Wall: No more images in the temporary holder. Removing it.');
 					tempHolder.remove();
