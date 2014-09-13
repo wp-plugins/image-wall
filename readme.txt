@@ -2,7 +2,7 @@
 Contributors: parakoos
 Tags: gallery, galleries, images, ajax, image, media, photo, photos, shortcode, 
 Requires at least: 3.5
-Tested up to: 3.9
+Tested up to: 4.0
 Stable tag: 2.15
 Donate link: http://www.themodernnomad.com/#utm_campaign=Image_Wall&utm_source=wordpress&utm_medium=website&utm_content=donation
 License: GPLv2 or later
