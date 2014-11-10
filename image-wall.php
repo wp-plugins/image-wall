@@ -3,8 +3,8 @@
 	Plugin Name: Image Wall
 	Plugin URI: http://www.themodernnomad.com/image-wall-plugin/#utm_campaign=Image_Wall&utm_source=wordpress&utm_medium=website&utm_content=plugin_link
 	Description: Browse posts/pages by their images, displayed randomly on an infinitely scrollable page. The images link back to the posts where they are attached.
-	Version: 2.15
-	Author: Gustav Andersson
+	Version: 2.16
+	Author: Gustav Andersson, Marco Catellani
 	Author URI: http://www.themodernnomad.com/about/#utm_campaign=Image_Wall&utm_source=wordpress&utm_medium=website&utm_content=author_link
 */
 /*  Copyright 2012  Gustav Andersson  (email : mail@themodernnomad.com)
@@ -193,8 +193,8 @@ function image_wall_options() {
 
 		<p>The [image_wall] shortcode comes with a number of options to customize its behavhiour. The available options are shown below with the corresponding default settings. For the full documentation of how to use these settings, please see the <a href="http://www.themodernnomad.com/image-wall-plugin/#utm_campaign=Image_Wall&utm_source=wordpress&utm_medium=website&utm_content=settings">Image Wall Plugin Page</a>.</p>		
 
-		<p><code>[image_wall image_sizes='thumbnail, medium' column_width='' batch_size='50' buffer_pixels='2000' support_author='false' move_to_end='false' column_proportion_restrictions='2.0' open_links_in_new_window='true' include_categories='' exclude_categories='' include_tags='' exclude_tags='' include_pages='true' background_color='black' gutter_pixels='8' corner_radius='8']</code></p>
-		
+		<p><code>[image_wall image_sizes='thumbnail, medium' column_width='' batch_size='50' buffer_pixels='2000' support_author='false' move_to_end='false' column_proportion_restrictions='2.0' open_links_in_new_window='true' include_categories='' exclude_categories='' include_tags='' exclude_tags='' include_pages='true' background_color='black' gutter_pixels='8' corner_radius='8' only_pages_number='' only_this_page='false' link_to_image='false']</code></p>
+
 		<h3>Image Order Regeneration Schedule</h3>
 		
 		<p>The ordering of the images is randomized when you activate the plugin. New images are slotted into the order at random as you add them to your media library.</p>
@@ -359,6 +359,15 @@ add_action('wp_enqueue_scripts', 'tmn_iw_enqueue');
 /************************************************************************/
 /*			SHORTCODE	 				*/
 /************************************************************************/
+function in_pages( $pages = null, $page_id = null ) {
+	//if ( !is_page($page_id) ) return false;
+	$pages = (array) $pages;
+	foreach ( $pages as $page ) {
+		if ( (int)$page == (int)$page_id )
+			return true;
+	}
+	return false;
+}
 
 /* See http://www.themodernnomad.com/image-wall-plugin/ for example usage.*/
 add_shortcode('image_wall', 'image_wall_sc');
@@ -392,7 +401,11 @@ function image_wall_sc($atts) {
 		'include_pages' 		=> 'true',
 		'background_color'		=> 'black',
 		'gutter_pixels'			=> '8',
-		'corner_radius'			=> '8'
+		'corner_radius'			=> '8',
+		'only_pages_number'		=> '',
+		'only_this_page'		=> 'false',
+		'link_to_image'			=> 'false',
+
 
 	), $atts ) );
 
@@ -484,13 +497,7 @@ function image_wall_sc($atts) {
 	
 	// Find, process and verify the batch size //
 	$batch_size = intval($batch_size);
-	if($batch_size <= 0) {
-		return "<div id='tmn-image-wall-error'><h3>
-" . __("Uh oh! I've detected a problem setting up the Image Wall!", "image-wall") . "
-		</h3><p>
-" . __("I couldn't parse the given batch size to a positive integer.", "image-wall") . "
-		</p></div>\n" ;
-	}
+	$batching = $batch_size > 0;
 
 	// Find, process and verify the move_to_end argument //
 	if($move_to_end != "true" && $move_to_end != "false") {
@@ -530,11 +537,21 @@ function image_wall_sc($atts) {
 	$exclude_categories = preg_split("/[\s,]+/",$exclude_categories, NULL, PREG_SPLIT_NO_EMPTY);
 	$include_tags = preg_split("/[\s,]+/",$include_tags, NULL, PREG_SPLIT_NO_EMPTY);
 	$exclude_tags = preg_split("/[\s,]+/",$exclude_tags, NULL, PREG_SPLIT_NO_EMPTY);
+	$only_pages_number = preg_split("/[\s,]+/",$only_pages_number, NULL, PREG_SPLIT_NO_EMPTY);
 
 	if($include_pages == 'true') {
 		$include_pages = true;
 	} else {
 	 	$include_pages = false; 
+	}
+	if($only_this_page == 'true') {
+		$postid = get_the_ID();
+		$only_pages_number = $postid;
+	}
+	if($link_to_image == 'true') {
+		$link_to_image = true;
+	} else {
+		$link_to_image = false;
 	}
 	
 	// Find, process and verify the 'support_author' 
@@ -567,7 +584,7 @@ function image_wall_sc($atts) {
 	// Grab and remember the page we are on, if paged.
 	$tmn_page = isset($_GET["tmn_iw_page"]) ? $_GET["tmn_iw_page"] : '1' ;
 	$image_wall_items = array();	
-	$expect_more_posts = true;
+	$expect_more_posts = $batching;
 
 	tmn_iw_set_default_variables();
 	
@@ -580,7 +597,7 @@ function image_wall_sc($atts) {
 			'post_type' 	 => 'attachment',
 			'post_mime_type' =>'image',
 			'posts_per_page' => $batch_size,
-			'nopaging' 	 => false,
+			'nopaging' 	 => !$batching,
 			'post_status' 	 => 'all',
 			'meta_key' 	 => 'tmn-iw-hash',
 			'orderby' 	 => 'meta_value',
@@ -610,7 +627,7 @@ function image_wall_sc($atts) {
 				'post_type' 	 => 'attachment',
 				'post_mime_type' =>'image',
 				'posts_per_page' => $batch_size,
-				'nopaging' 	 => false,
+				'nopaging' 	 => !$batching,
 				'post_status' 	 => 'all',
 				'orderby' 	 => 'rand',
 				'paged' 	 => $tmn_page
@@ -645,6 +662,9 @@ function image_wall_sc($atts) {
 			if ( !empty($include_tags) && ! has_tag( $include_tags, $parent_ID ) ) continue;
 			if ( !empty($exclude_tags) &&   has_tag( $exclude_tags, $parent_ID ) ) continue;
 		}
+		
+		// If we limit the pages covered, then don't show them
+		if ( !empty($only_pages_number) && ! in_pages( $only_pages_number, $parent_ID ) ) continue;
 		
 		// We need to find the best available image size to use. 
 		// That is the image size that will span the most columns (legally) while using the fewest pixels.
@@ -722,7 +742,13 @@ function image_wall_sc($atts) {
 
 		$alt_and_title = trim(strip_tags(get_the_title() . " (". get_the_title($parent_ID) .")" ));
 
-		$image_wall_items[] = '<a class="tmn-image-wall-item-link" href="'.get_permalink( $parent_ID ).'" '.$target_string.' rel="nofollow"><img width="'.$width.'" height="'.$height.'" src="'.$url.'" class="tmn-image-wall-item tmn-image-wall-span-cols-'.$columns_spanned.'" alt="'.$alt_and_title.'" title="'.$alt_and_title.'" /></a>';
+		$link_url = get_permalink( $parent_ID );
+		if ($link_to_image == true) {
+			$link_url_to_full = wp_get_attachment_image_src(get_the_id(), 'full');
+			$link_url = $link_url_to_full[0];
+		}
+		$image_wall_items[] = '<a class="tmn-image-wall-item-link" href="'.$link_url.'" '.$target_string.' rel="nofollow"><img width="'.$width.'" height="'.$height.'" src="'.$url.'" class="tmn-image-wall-item tmn-image-wall-span-cols-'.$columns_spanned.'" alt="'.$alt_and_title.'" title="'.$alt_and_title.'" /></a>';
+
 	endwhile;	// Done extracting images from batch of posts
 		
 	// Our work here is done! Restore the original query and return.

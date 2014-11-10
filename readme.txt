@@ -106,3 +106,11 @@ Fixed some compatibility issues with WordPress v3.9.
 
 = 2.15 =
 Fixed a backward compatibility issue with pre-3.9 WP versions introduced in 2.14.
+
+= 2.16 =
+* Added option for link_to_image
+* Added option for only_this_page
+* Added option for only_pages_number
+* Now allow turning off batching by setting batch_size to a number of 0 or less.
+
+Thanks to Marco Catellani for the code for link_to_image, only_this_page and only_pages_number.
