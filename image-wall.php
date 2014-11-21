@@ -3,7 +3,7 @@
 	Plugin Name: Image Wall
 	Plugin URI: http://www.themodernnomad.com/image-wall-plugin/#utm_campaign=Image_Wall&utm_source=wordpress&utm_medium=website&utm_content=plugin_link
 	Description: Browse posts/pages by their images, displayed randomly on an infinitely scrollable page. The images link back to the posts where they are attached.
-	Version: 2.16
+	Version: 2.17
 	Author: Gustav Andersson, Marco Catellani
 	Author URI: http://www.themodernnomad.com/about/#utm_campaign=Image_Wall&utm_source=wordpress&utm_medium=website&utm_content=author_link
 */
@@ -709,7 +709,12 @@ function image_wall_sc($atts) {
 				continue;
 			}
 
-			$max_number_of_columns = intval(( $width ) / $column_width);
+			$max_number_of_columns = min(10, intval(($width + $gutter_pixels) / $column_width));
+
+			if($max_number_of_columns < 1) {
+				// This image is not wide enough to fill even a single column. Skip it. 
+				continue;
+			}
 
 			if($use_column_proportion_restrictions && $height != 'unknown'){
 				for($i = count($column_proportion_restrictions) ; $i > 0 ; $i -- ) {

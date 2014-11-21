@@ -2,7 +2,7 @@
 Contributors: parakoos
 Tags: gallery, galleries, images, ajax, image, media, photo, photos, shortcode, 
 Requires at least: 3.5
-Tested up to: 4.0
+Tested up to: 4.0.1
 Stable tag: trunk
 Donate link: http://www.themodernnomad.com/#utm_campaign=Image_Wall&utm_source=wordpress&utm_medium=website&utm_content=donation
 License: GPLv2 or later
@@ -114,3 +114,7 @@ Fixed a backward compatibility issue with pre-3.9 WP versions introduced in 2.14
 * Now allow turning off batching by setting batch_size to a number of 0 or less.
 
 Thanks to Marco Catellani for the code for link_to_image, only_this_page and only_pages_number.
+
+= 2.17 =
+* Fixed a bug where images that were just big enough to span a number of columns would not be deemed big enough and a smaller number of columns used.
+* Fixed a bug where it was possible for an image to span zero number of columns, breaking the stylesheet. Thanks to David Rector for alerting me to this problem.
